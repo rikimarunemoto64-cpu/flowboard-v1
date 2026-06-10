@@ -21,6 +21,9 @@ import type { Task, ColumnId } from '../types';
 interface BoardProps {
   tasks: Task[];
   onMoveTask: (id: string, toCol: ColumnId, toIndex?: number) => void;
+  selectedTaskId?: string | null;
+  setSelectedTaskId?: (id: string | null) => void;
+  onUpdateTask?: (id: string, updates: Partial<Task>) => void;
 }
 
 const COLUMNS: { id: ColumnId; title: string }[] = [
@@ -30,7 +33,7 @@ const COLUMNS: { id: ColumnId; title: string }[] = [
   { id: 'done', title: '完了' },
 ];
 
-export function Board({ tasks, onMoveTask }: BoardProps) {
+export function Board({ tasks, onMoveTask, selectedTaskId, setSelectedTaskId, onUpdateTask }: BoardProps) {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
 
   const sensors = useSensors(
@@ -49,6 +52,7 @@ export function Board({ tasks, onMoveTask }: BoardProps) {
     const task = tasks.find(t => t.id === active.id);
     if (task) {
       setActiveTask(task);
+      setSelectedTaskId?.(task.id);
     }
   };
 
@@ -129,6 +133,10 @@ export function Board({ tasks, onMoveTask }: BoardProps) {
             id={col.id}
             title={col.title}
             tasks={tasks.filter(t => t.col === col.id)}
+            selectedTaskId={selectedTaskId}
+            setSelectedTaskId={setSelectedTaskId}
+            onUpdateTask={onUpdateTask}
+            onMoveTask={onMoveTask}
           />
         ))}
       </div>
@@ -136,7 +144,10 @@ export function Board({ tasks, onMoveTask }: BoardProps) {
       <DragOverlay>
         {activeTask ? (
           <div className="rotate-3 opacity-90 scale-105">
-            <TaskCard task={activeTask} />
+            <TaskCard 
+              task={activeTask} 
+              isSelected={true} 
+            />
           </div>
         ) : null}
       </DragOverlay>

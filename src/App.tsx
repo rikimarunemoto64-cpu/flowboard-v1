@@ -1,15 +1,17 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Hero } from './components/Hero';
 import { QuickAdd } from './components/QuickAdd';
 import { Board } from './components/Board';
 import { Toast } from './components/Toast';
 import { useTasks } from './hooks/useTasks';
 import { useToast } from './hooks/useToast';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import type { Priority, ColumnId } from './types';
 
 function App() {
-  const { tasks, addTask, moveTask, removeTask } = useTasks();
+  const { tasks, addTask, moveTask, removeTask, updateTask } = useTasks();
   const { toast, showToast, hideToast } = useToast();
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   const handleAdd = useCallback((text: string, priority: Priority) => {
     const newTask = addTask(text, priority);
@@ -22,17 +24,14 @@ function App() {
     
     const previousCol = taskBeforeMove.col;
     
-    // Only show toast if column changed
     if (previousCol !== toCol) {
       moveTask(id, toCol, toIndex);
-      // Create a dummy task with the new col for the toast message
       showToast({ 
         type: 'MOVE', 
         task: { ...taskBeforeMove, col: toCol }, 
         previousCol 
       });
     } else {
-      // Reordering within the same column
       moveTask(id, toCol, toIndex);
     }
   }, [tasks, moveTask, showToast]);
@@ -49,11 +48,25 @@ function App() {
     hideToast();
   }, [toast, removeTask, moveTask, hideToast]);
 
+  useKeyboardShortcuts({
+    tasks,
+    selectedTaskId,
+    setSelectedTaskId,
+    moveTask,
+    onUndo: handleUndo,
+  });
+
   return (
     <div className="min-h-screen bg-white py-12 px-4 md:px-8">
       <Hero />
       <QuickAdd onAdd={handleAdd} />
-      <Board tasks={tasks} onMoveTask={handleMove} />
+      <Board 
+        tasks={tasks} 
+        onMoveTask={handleMove} 
+        selectedTaskId={selectedTaskId}
+        setSelectedTaskId={setSelectedTaskId}
+        onUpdateTask={updateTask}
+      />
       <Toast action={toast} onUndo={handleUndo} />
     </div>
   );

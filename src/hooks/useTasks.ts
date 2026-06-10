@@ -3,13 +3,20 @@ import type { Task, ColumnId, Priority } from '../types';
 
 const STORAGE_KEY = 'flowboard:tasks:v1';
 
+const generateId = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+};
+
 const INITIAL_TASKS: Task[] = [
-  { id: crypto.randomUUID(), text: 'ピーク前にミルク残量チェック', priority: 'high', col: 'todo', createdAt: Date.now() },
-  { id: crypto.randomUUID(), text: '新人パートナーにエスプレッソ抽出を共有', priority: 'mid', col: 'todo', createdAt: Date.now() },
-  { id: crypto.randomUUID(), text: '11時 学生ピークの導線を整える', priority: 'high', col: 'doing', createdAt: Date.now() },
-  { id: crypto.randomUUID(), text: 'モバイルオーダー受け取り棚の整理', priority: 'low', col: 'doing', createdAt: Date.now() },
-  { id: crypto.randomUUID(), text: 'クリスマスブレンドの試飲メモを店長に共有', priority: 'mid', col: 'review', createdAt: Date.now() },
-  { id: crypto.randomUUID(), text: '朝の品出しチェックリスト完了', priority: 'low', col: 'done', createdAt: Date.now() },
+  { id: generateId(), text: 'ピーク前にミルク残量チェック', priority: 'high', col: 'todo', createdAt: Date.now() },
+  { id: generateId(), text: '新人パートナーにエスプレッソ抽出を共有', priority: 'mid', col: 'todo', createdAt: Date.now() },
+  { id: generateId(), text: '11時 学生ピークの導線を整える', priority: 'high', col: 'doing', createdAt: Date.now() },
+  { id: generateId(), text: 'モバイルオーダー受け取り棚の整理', priority: 'low', col: 'doing', createdAt: Date.now() },
+  { id: generateId(), text: 'クリスマスブレンドの試飲メモを店長に共有', priority: 'mid', col: 'review', createdAt: Date.now() },
+  { id: generateId(), text: '朝の品出しチェックリスト完了', priority: 'low', col: 'done', createdAt: Date.now() },
 ];
 
 export function useTasks() {
@@ -34,7 +41,7 @@ export function useTasks() {
 
   const addTask = useCallback((text: string, priority: Priority) => {
     const newTask: Task = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       text,
       priority,
       col: 'todo',
@@ -74,5 +81,9 @@ export function useTasks() {
     });
   }, []);
 
-  return { tasks, setTasks, addTask, removeTask, moveTask };
+  const updateTask = useCallback((id: string, updates: Partial<Task>) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+  }, []);
+
+  return { tasks, setTasks, addTask, removeTask, moveTask, updateTask };
 }

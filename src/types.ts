@@ -4,6 +4,7 @@ export type ColumnId = 'todo' | 'doing' | 'review' | 'done';
 export interface Task {
   id: string;         // crypto.randomUUID()
   text: string;
+  memo?: string;
   priority: Priority;
   col: ColumnId;
   createdAt: number;
