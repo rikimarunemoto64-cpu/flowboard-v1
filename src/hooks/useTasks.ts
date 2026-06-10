@@ -51,6 +51,18 @@ export function useTasks() {
     return newTask;
   }, []);
 
+  const addTasks = useCallback((tasksToAdd: { text: string; priority: Priority }[]) => {
+    const newTasks: Task[] = tasksToAdd.map(t => ({
+      id: generateId(),
+      text: t.text,
+      priority: t.priority,
+      col: 'todo',
+      createdAt: Date.now(),
+    }));
+    setTasks(prev => [...prev, ...newTasks]);
+    return newTasks;
+  }, []);
+
   const removeTask = useCallback((id: string) => {
     setTasks(prev => prev.filter(t => t.id !== id));
   }, []);
@@ -85,5 +97,5 @@ export function useTasks() {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
   }, []);
 
-  return { tasks, setTasks, addTask, removeTask, moveTask, updateTask };
+  return { tasks, setTasks, addTask, addTasks, removeTask, moveTask, updateTask };
 }
