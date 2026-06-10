@@ -82,7 +82,7 @@ ${text}
                     return;
                   }
 
-                  const data = await apiResponse.json();
+                  const data = (await apiResponse.json()) as any;
                   let resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
 
                   // Remove markdown code blocks if present just in case
